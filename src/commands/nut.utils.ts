@@ -28,7 +28,7 @@ export interface INotifyAppManifest {
 
 export const availableManifests: INotifyAppManifest[] = [];
 
-const NUT_VERSION = '1.0.0';
+const NUT_VERSION = '1.1.0';
 
 export let selectedApps: string[] = [];
 export let verboseEnabled: boolean = false;

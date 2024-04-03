@@ -1,6 +1,6 @@
 #! /usr/bin/env bun
 import { program } from 'commander';
-import { buildApps } from './commands/manifests';
+import { buildApps } from './commands/nut.build';
 
 import chalk from 'chalk';
 import { runAgentClientBuild } from './commands/manifests/manifest.agent';
