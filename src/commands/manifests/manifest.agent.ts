@@ -12,9 +12,12 @@ import {
 
 const manifest = publishManifest({
   appName: 'agent',
-  buildName: 'nfc-agent-client',
+  projectName: 'nfc-agent-client',
   productionContainer: 'profiles-agent-client',
   developContainer: 'ptc-profiles-agent-client',
+  serve: {
+    port: 4210,
+  },
 });
 
 export const runAgentClientBuild = async (config: {
@@ -40,7 +43,7 @@ export const runAgentClientBuild = async (config: {
 
   whenVerbose(chalk.blue(`Building ${manifest.appName}...`));
   const { stderr, exitCode } = executeShell(
-    `nx build ${manifest.buildName} --prod`
+    `nx build ${manifest.projectName} --prod`
   );
 
   if (exitCode) {
@@ -68,7 +71,7 @@ export const runAgentClientBuild = async (config: {
 
 const _capSync = () => {
   const { stderr, exitCode, stdout } = executeShell(
-    `nx run ${manifest.buildName}:cap:sync`
+    `nx run ${manifest.projectName}:cap:sync`
   );
 
   whenVerbose(bufferToString(stdout));

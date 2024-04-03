@@ -2,9 +2,12 @@ import { baseBundler, publishManifest } from '../nut.utils';
 
 const manifest = publishManifest({
   appName: 'company',
-  buildName: 'nfc-company-client',
+  projectName: 'nfc-company-client',
   productionContainer: 'company-client',
   developContainer: 'ptc-company-client',
+  serve: {
+    port: 4220,
+  },
 });
 
 export const runCompanyClientBuild = async () => {

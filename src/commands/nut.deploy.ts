@@ -34,15 +34,15 @@ export const deployApps = async (production = false) => {
     await _runPreDeployTasks(manifest);
 
     await _cpFile(
-      `./apps/${manifest.buildName}/Dockerfile`,
-      `dist/apps/${manifest.buildName}/Dockerfile`
+      `./apps/${manifest.projectName}/Dockerfile`,
+      `dist/apps/${manifest.projectName}/Dockerfile`
     );
     await _cpFile(
-      `./apps/${manifest.buildName}/captain-definition`,
-      `dist/apps/${manifest.buildName}/captain-definition`
+      `./apps/${manifest.projectName}/captain-definition`,
+      `dist/apps/${manifest.projectName}/captain-definition`
     );
 
-    _makeTar(`./dist/apps/${manifest.buildName}`);
+    _makeTar(`./dist/apps/${manifest.projectName}`);
 
     _deployToCaprover(manifest, production);
 

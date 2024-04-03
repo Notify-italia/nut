@@ -2,18 +2,27 @@
   "name": "notify-bundler",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "main": "bun index.ts",
+    "build": "bun build --target=node ./src/index.ts --outfile=dist/index.js && bun run build:declaration",
+    "build:declaration": "tsc --emitDeclarationOnly --project tsconfig.types.json",
+    "install-package": "npm install -g",
+    "postbuild": "rimraf tsconfig.types.tsbuildinfo"
+  },
+  "author": "Stefano Vecchietti",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "cli-spinner": "^0.2.10",
+    "commander": "^12.0.0"
+  },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/cli-spinner": "^0.2.3",
-    "chalk": "^5.3.0",
-    "commander": "^12.0.0"
+    "@types/cli-spinner": "^0.2.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "bin": {
-    "notify-bundler": "index.ts",
-    "nb": "index.ts",
-    "nut": "index.ts"
+    "nut": "src/index.ts"
   }
 }

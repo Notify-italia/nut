@@ -1,10 +1,10 @@
 import { hasApp } from '../nut.utils';
-import { runAgentClientBuild } from './build.agent';
-import { runApiBuild } from './build.api';
-import { runCompanyClientBuild } from './build.company';
-import { runPlayerBuild } from './build.player';
-import { runPublicClientBuild } from './build.public';
-import { runRootClientBuild } from './build.root';
+import { runAgentClientBuild } from './manifest.agent';
+import { runApiBuild } from './manifest.api';
+import { runCompanyClientBuild } from './manifest.company';
+import { runPlayerBuild } from './manifest.player';
+import { runPublicClientBuild } from './manifest.public';
+import { runRootClientBuild } from './manifest.root';
 
 export const buildApps = async () => {
   await runCompanyClientBuild();

@@ -17,10 +17,13 @@ export type INotifyAvailableApps = (typeof NotifyAvailableApps)[number];
 
 export interface INotifyAppManifest {
   appName: INotifyAvailableApps;
-  buildName: string;
+  projectName: string;
   productionContainer: string;
   developContainer: string;
   preDeployTasks?: string[][];
+  serve?: {
+    port: number;
+  };
 }
 
 export const availableManifests: INotifyAppManifest[] = [];
@@ -46,7 +49,7 @@ export const hasApp = (app: INotifyAvailableApps) => {
 
 export const baseBundler = async (
   manifest: INotifyAppManifest,
-  command = `nx build ${manifest.buildName} ${
+  command = `nx build ${manifest.projectName} ${
     productionOptTrue ? '--prod' : ''
   }`
 ) => {
@@ -149,4 +152,14 @@ const _hasOption = (
 
 export const executeShell = (command: string) => {
   return Bun.spawnSync(command.split(' '));
+};
+
+export const executeAsyncShell = async (command: string) => {
+  const sh = Bun.spawn(command.split(' '));
+
+  for await (let item of sh.stdout) {
+    console.log(String.fromCharCode.apply(null, item as any));
+  }
+
+  return sh;
 };
