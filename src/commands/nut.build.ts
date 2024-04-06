@@ -3,6 +3,7 @@ import { runApiBuild } from './manifests/manifest.api';
 import { runCompanyClientBuild } from './manifests/manifest.company';
 import { runPlayerBuild } from './manifests/manifest.player';
 import { runPublicClientBuild } from './manifests/manifest.public';
+import { runRootApiBuild } from './manifests/manifest.root-api';
 import { runRootClientBuild } from './manifests/manifest.root-client';
 import { hasApp } from './nut.utils';
 
@@ -16,6 +17,8 @@ export const buildApps = async () => {
   await runPlayerBuild();
 
   await runApiBuild();
+
+  await runRootApiBuild();
 
   await runPublicClientBuild();
 

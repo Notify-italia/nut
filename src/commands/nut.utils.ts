@@ -10,6 +10,7 @@ export const NotifyAvailableApps = [
   'player',
   'native',
   'root-client',
+  'root-api',
   'all',
 ] as const;
 

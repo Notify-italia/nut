@@ -4,7 +4,7 @@ const manifest = publishManifest({
   appName: 'root-client',
   projectName: 'nfc-root-client',
   productionContainer: 'notify-root-client',
-  developContainer: 'ptc-notify-root-client',
+  developContainer: 'notify-root-client',
   serve: {
     port: 4230,
   },
