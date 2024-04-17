@@ -4,10 +4,17 @@ import { Spinner } from 'cli-spinner';
 import {
   availableManifests,
   bufferToString,
+  printError,
   selectedApps,
   whenVerbose,
   type INotifyAppManifest,
 } from './nut.utils';
+
+const { CAPROVER_URL, CAPROVER_PASSWORD, CAPROVER_NAME } = process.env as {
+  [key: string]: string;
+};
+
+const _caproverLoginError = `Your auth token for notify at ${CAPROVER_URL} is not valid anymore, try to login again...`;
 
 //dichiaro lo spinner del cli (globetto che gira mentre esegue il deploy)
 const spinner = new Spinner({
@@ -110,6 +117,14 @@ const _deployToCaprover = (
 
   if (!stringStdout.includes('Deployed successfully')) {
     spinner.stop(true);
+
+    //re-login to caprover if the auth token is invalid
+    if (stringStdout.includes(_caproverLoginError)) {
+      caproverLogin();
+      _deployToCaprover(manifest, production);
+      return;
+    }
+
     console.log(chalk.bgRed.white('Deployment failed for ' + manifest.appName));
     console.log(chalk.red(stringStdout));
     process.exit(1);
@@ -167,4 +182,26 @@ const _runPreDeployTasks = async (manifest: INotifyAppManifest) => {
       )
     );
   });
+};
+
+export const caproverLogin = () => {
+  console.log(chalk.blue('Logging into CapRover...'));
+  const { exitCode, stdout } = Bun.spawnSync([
+    'caprover',
+    'login',
+    '-u',
+    CAPROVER_URL,
+    '-p',
+    CAPROVER_PASSWORD,
+    '-n',
+    CAPROVER_NAME,
+  ]);
+
+  if (exitCode) {
+    printError(stdout, 'CapRover login');
+  }
+
+  console.log(chalk.green('Logged into CapRover'));
+
+  whenVerbose(bufferToString(stdout));
 };

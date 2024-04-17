@@ -39,8 +39,8 @@ export let openAfterSync: '-ios' | '-android' | '-both' | undefined;
 export const bufferToString = (buffer: Buffer) => buffer.toString('utf-8');
 
 export const printError = (stderr: Buffer, appName: string) => {
-  console.log(chalk.red(`${appName} build failed`));
-  console.log(bufferToString(stderr));
+  console.log(chalk.bgRed.white(`${appName} task failed`));
+  console.log(chalk.red(bufferToString(stderr)));
   process.exit(1);
 };
 

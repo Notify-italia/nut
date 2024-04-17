@@ -4,7 +4,7 @@ import { buildApps } from './commands/nut.build';
 
 import chalk from 'chalk';
 import { runAgentClientBuild } from './commands/manifests/manifest.agent';
-import { deployApps } from './commands/nut.deploy';
+import { caproverLogin, deployApps } from './commands/nut.deploy';
 import {
   availableManifests,
   bufferToString,
@@ -17,6 +17,10 @@ import {
 const cap = program
   .command('cap')
   .description('Agent client capacitor commands');
+
+program.command('force-login').action(async () => {
+  caproverLogin();
+});
 
 program
   .command('deploy <apps>')
