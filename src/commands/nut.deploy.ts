@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import { Spinner } from 'cli-spinner';
 
+import { NUT_ENV } from '../env';
 import {
   availableManifests,
   bufferToString,
@@ -10,11 +11,9 @@ import {
   type INotifyAppManifest,
 } from './nut.utils';
 
-const { CAPROVER_URL, CAPROVER_PASSWORD, CAPROVER_NAME } = process.env as {
-  [key: string]: string;
-};
+const { CAPROVER_URL, CAPROVER_PASSWORD, CAPROVER_NAME } = NUT_ENV;
 
-const _caproverLoginError = `Your auth token for notify at ${CAPROVER_URL} is not valid anymore, try to login again...`;
+const _caproverLoginError = `try to login again`;
 
 //dichiaro lo spinner del cli (globetto che gira mentre esegue il deploy)
 const spinner = new Spinner({
@@ -100,7 +99,8 @@ const _deployToCaprover = (
   manifest: INotifyAppManifest,
   production: boolean
 ) => {
-  const { stderr, stdout } = Bun.spawnSync([
+  spinner.start();
+  const { stdout } = Bun.spawnSync([
     'caprover',
     'deploy',
     '-t',
@@ -117,10 +117,11 @@ const _deployToCaprover = (
 
   if (!stringStdout.includes('Deployed successfully')) {
     spinner.stop(true);
-
     //re-login to caprover if the auth token is invalid
     if (stringStdout.includes(_caproverLoginError)) {
+      console.log(chalk.red('CapRover login token expired'));
       caproverLogin();
+
       _deployToCaprover(manifest, production);
       return;
     }
@@ -185,7 +186,25 @@ const _runPreDeployTasks = async (manifest: INotifyAppManifest) => {
 };
 
 export const caproverLogin = () => {
-  console.log(chalk.blue('Logging into CapRover...'));
+  console.log(
+    chalk.blue(
+      'Logging into CapRover with credentials:',
+      '\n',
+      CAPROVER_URL,
+      CAPROVER_PASSWORD,
+      CAPROVER_NAME
+    )
+  );
+
+  if (!CAPROVER_URL || !CAPROVER_PASSWORD || !CAPROVER_NAME) {
+    console.log(
+      chalk.red('Please provide the CapRover URL, password and name')
+    );
+    process.exit(1);
+  }
+
+  Bun.spawnSync(['caprover', 'logout', '-n', CAPROVER_NAME]);
+
   const { exitCode, stdout } = Bun.spawnSync([
     'caprover',
     'login',
