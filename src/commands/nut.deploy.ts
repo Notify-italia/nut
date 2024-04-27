@@ -99,7 +99,6 @@ const _deployToCaprover = (
   manifest: INotifyAppManifest,
   production: boolean
 ) => {
-  spinner.start();
   const { stdout } = Bun.spawnSync([
     'caprover',
     'deploy',
