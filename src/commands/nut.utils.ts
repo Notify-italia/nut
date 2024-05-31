@@ -50,13 +50,15 @@ export const hasApp = (app: INotifyAvailableApps) => {
 
 export const baseBundler = async (
   manifest: INotifyAppManifest,
-  command = `nx build ${manifest.projectName} ${
-    productionOptTrue ? '--prod' : ''
-  }`
+  command = `nx run ${manifest.projectName}:build:${
+    productionOptTrue ? 'production' : 'ptc'
+  } `
 ) => {
   if (!hasApp(manifest.appName as INotifyAvailableApps) && !hasApp('all')) {
     return;
   }
+
+  whenVerbose(`running ${command}`);
 
   const spinner = new Spinner({
     text: `%s Building ${manifest.appName}...`,

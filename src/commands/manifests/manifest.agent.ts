@@ -5,6 +5,7 @@ import {
   executeShell,
   hasApp,
   printError,
+  productionOptTrue,
   publishManifest,
   whenVerbose,
   type INotifyAvailableApps,
@@ -43,7 +44,9 @@ export const runAgentClientBuild = async (config: {
 
   whenVerbose(chalk.blue(`Building ${manifest.appName}...`));
   const { stderr, exitCode } = executeShell(
-    `nx build ${manifest.projectName} --prod`
+    `nx run ${manifest.projectName}:build:${
+      productionOptTrue ? 'production' : 'ptc'
+    } `
   );
 
   if (exitCode) {
