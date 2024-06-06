@@ -77,6 +77,7 @@ cap
   .description("Sync the agent client's capacitor project")
   .option('-v --verbose', 'Verbose output')
   .option('-ios', 'Open XCode after sync')
+  .option('-prod --production', 'Sync production')
   .option('-android', 'Open Android Studio after sync')
   .option('-both', 'Open both IDEs after sync')
   .action(async () => {
