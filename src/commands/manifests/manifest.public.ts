@@ -8,6 +8,7 @@ const manifest = publishManifest({
   serve: {
     port: 4200,
   },
+  minifycss: false,
   preDeployTasks: [
     ['nx', 'gulp', 'nfc-public'],
     ['cp', './apps/nfc-public/main.js', 'dist/apps/nfc-public/server/main.js'],

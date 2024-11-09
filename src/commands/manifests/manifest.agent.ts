@@ -83,5 +83,5 @@ const _capSync = () => {
     return;
   }
   console.log(chalk.red('Capacitor sync failed'));
-  console.log(stderr);
+  console.log(printError(stderr, manifest.appName));
 };

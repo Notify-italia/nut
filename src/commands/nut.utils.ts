@@ -1,6 +1,8 @@
 import chalk from 'chalk';
 import { Spinner } from 'cli-spinner';
 import type { Command } from 'commander';
+import fs from 'fs';
+import { join } from 'path';
 
 export const NotifyAvailableApps = [
   'company',
@@ -21,6 +23,10 @@ export interface INotifyAppManifest {
   projectName: string;
   productionContainer: string;
   developContainer: string;
+  /**
+   * EXPERIMENTAL: Minify CSS after build
+   */
+  minifycss?: boolean;
   preDeployTasks?: string[][];
   serve?: {
     port: number;
@@ -76,6 +82,27 @@ export const baseBundler = async (
     spinner.stop(true);
     printError(stderr, manifest.appName);
   }
+
+  if (manifest.minifycss) {
+    whenVerbose(chalk.blue('Minifying CSS...'));
+    const cssFiles = _searchFiles(`dist/apps/${manifest.projectName}`)?.filter(
+      (file) => file.endsWith('.css')
+    );
+
+    cssFiles?.forEach((file) => {
+      const { stdout, stderr, exitCode } = executeShell(
+        `npx tailwindcss -o ${file} --minify`
+      );
+
+      if (exitCode) {
+        spinner.stop(true);
+        printError(stderr, manifest.appName);
+      }
+
+      whenVerbose(bufferToString(stdout));
+    });
+  }
+
   spinner.stop(true);
 
   console.log(chalk.green.bold(`${manifest.appName} build successful`));
@@ -165,4 +192,14 @@ export const executeAsyncShell = async (command: string) => {
   }
 
   return sh;
+};
+
+const _searchFiles = (dir: string): string[] => {
+  return fs
+    .readdirSync(dir, { withFileTypes: true })
+    .flatMap((file) =>
+      file.isDirectory()
+        ? _searchFiles(join(dir, file.name))
+        : join(dir, file.name)
+    );
 };
