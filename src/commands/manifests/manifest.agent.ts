@@ -4,10 +4,10 @@ import {
   bufferToString,
   executeShell,
   hasApp,
+  logWhenVerbose,
   printError,
   productionOptTrue,
   publishManifest,
-  whenVerbose,
   type INotifyAvailableApps,
 } from '../nut.utils';
 
@@ -42,7 +42,7 @@ export const runAgentClientBuild = async (config: {
     return;
   }
 
-  whenVerbose(chalk.blue(`Building ${manifest.appName}...`));
+  logWhenVerbose(chalk.blue(`Building ${manifest.appName}...`));
   const { stderr, exitCode } = executeShell(
     `nx run ${manifest.projectName}:build:${
       productionOptTrue ? 'production' : 'ptc'
@@ -77,7 +77,7 @@ const _capSync = () => {
     `nx run ${manifest.projectName}:cap:sync`
   );
 
-  whenVerbose(bufferToString(stdout));
+  logWhenVerbose(bufferToString(stdout));
 
   if (!exitCode) {
     return;

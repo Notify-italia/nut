@@ -33,6 +33,16 @@ export interface INotifyAppManifest {
   };
 }
 
+//dichiaro lo spinner del cli (globetto che gira mentre esegue il deploy)
+export const spinner = new Spinner({
+  text: 'Deploying...',
+  stream: process.stderr,
+  onTick: function (msg) {
+    this.clearLine(this.stream);
+    this.stream.write(msg);
+  },
+}).setSpinnerString(15);
+
 export const availableManifests: INotifyAppManifest[] = [];
 
 const NUT_VERSION = '1.1.0';
@@ -64,7 +74,7 @@ export const baseBundler = async (
     return;
   }
 
-  whenVerbose(`running ${command}`);
+  logWhenVerbose(`running ${command}`);
 
   const spinner = new Spinner({
     text: `%s Building ${manifest.appName}...`,
@@ -76,7 +86,7 @@ export const baseBundler = async (
   // This code snippet is using a ternary operator to conditionally execute a command based on the presence of the `command` parameter
   const { stdout, stderr, exitCode } = executeShell(command);
 
-  whenVerbose(bufferToString(stdout));
+  logWhenVerbose(bufferToString(stdout));
 
   if (exitCode) {
     spinner.stop(true);
@@ -84,7 +94,7 @@ export const baseBundler = async (
   }
 
   if (manifest.minifycss) {
-    whenVerbose(chalk.blue('Minifying CSS...'));
+    logWhenVerbose(chalk.blue('Minifying CSS...'));
     const cssFiles = _searchFiles(`dist/apps/${manifest.projectName}`)?.filter(
       (file) => file.endsWith('.css')
     );
@@ -99,7 +109,7 @@ export const baseBundler = async (
         printError(stderr, manifest.appName);
       }
 
-      whenVerbose(bufferToString(stdout));
+      logWhenVerbose(bufferToString(stdout));
     });
   }
 
@@ -117,7 +127,7 @@ export const publishManifest = (
   return config;
 };
 
-export const whenVerbose = (chalk: string) => {
+export const logWhenVerbose = (chalk: string) => {
   if (!verboseEnabled) {
     return;
   }
@@ -128,7 +138,7 @@ export const whenVerbose = (chalk: string) => {
 export const parseCommand = (
   program: Command,
   config?: {
-    appsOptional?: boolean;
+    appsNotRequired?: boolean;
   }
 ) => {
   console.log(
@@ -153,13 +163,17 @@ export const parseCommand = (
     );
   }
 
-  if (!selectedApps?.length && !config?.appsOptional) {
+  if (!selectedApps?.length && !config?.appsNotRequired) {
     console.log(
       chalk.bgRed.white.bold('No apps specified, specify an app with -a flag')
     );
     console.log(chalk.red('Available apps: company, agent, admin, app, all'));
 
     process.exit(1);
+  }
+
+  if (verboseEnabled) {
+    console.log(chalk.blue('Verbose output enabled'));
   }
 
   return {

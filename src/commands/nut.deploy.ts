@@ -1,29 +1,19 @@
 import chalk from 'chalk';
-import { Spinner } from 'cli-spinner';
 
 import { NUT_ENV } from '../env';
 import {
   availableManifests,
   bufferToString,
+  logWhenVerbose,
   printError,
   selectedApps,
-  whenVerbose,
+  spinner,
   type INotifyAppManifest,
 } from './nut.utils';
 
 const { CAPROVER_URL, CAPROVER_PASSWORD, CAPROVER_NAME } = NUT_ENV;
 
 const _caproverLoginError = `try to login again`;
-
-//dichiaro lo spinner del cli (globetto che gira mentre esegue il deploy)
-const spinner = new Spinner({
-  text: 'Deploying...',
-  stream: process.stderr,
-  onTick: function (msg) {
-    this.clearLine(this.stream);
-    this.stream.write(msg);
-  },
-}).setSpinnerString(15);
 
 export const deployApps = async (production = false) => {
   const mainfests = selectedApps.includes('all')
@@ -53,7 +43,7 @@ export const deployApps = async (production = false) => {
     _deployToCaprover(manifest, production);
 
     _removeTar();
-    whenVerbose(chalk.green(`${manifest.appName} done`));
+    logWhenVerbose(chalk.green(`${manifest.appName} done`));
   });
 
   spinner.stop(true);
@@ -79,7 +69,7 @@ const _cpFile = async (from: string, to: string) => {
   const file = Bun.file(from);
   await Bun.write(to, file);
 
-  whenVerbose(chalk.blue(`Copied ${from} to ${to}`));
+  logWhenVerbose(chalk.blue(`Copied ${from} to ${to}`));
 };
 
 const _makeTar = (path: string) => {
@@ -92,7 +82,7 @@ const _makeTar = (path: string) => {
     path,
   ]);
 
-  whenVerbose(chalk.blue(`Created deploy.tar using path ${path} `));
+  logWhenVerbose(chalk.blue(`Created deploy.tar using path ${path} `));
 };
 
 const _deployToCaprover = (
@@ -112,7 +102,7 @@ const _deployToCaprover = (
 
   const stringStdout = bufferToString(stdout);
 
-  whenVerbose(stringStdout);
+  logWhenVerbose(stringStdout);
 
   if (!stringStdout.includes('Deployed successfully')) {
     spinner.stop(true);
@@ -130,7 +120,7 @@ const _deployToCaprover = (
     process.exit(1);
   }
 
-  whenVerbose(
+  logWhenVerbose(
     chalk.blue(
       `Deployed ${manifest.appName} to ${
         production ? manifest.productionContainer : manifest.developContainer
@@ -142,7 +132,7 @@ const _deployToCaprover = (
 const _removeTar = () => {
   Bun.spawnSync(['rm', './deploy.tar']);
 
-  whenVerbose(chalk.yellow('Removed deploy.tar'));
+  logWhenVerbose(chalk.yellow('Removed deploy.tar'));
 };
 
 const _runPreDeployTasks = async (manifest: INotifyAppManifest) => {
@@ -151,11 +141,11 @@ const _runPreDeployTasks = async (manifest: INotifyAppManifest) => {
   }
 
   await asyncForEach(manifest.preDeployTasks, async (task) => {
-    if (task[0] === 'cp') {
+    if (task[0] === 'cp' && task[1] !== '-r') {
       return await _cpFile(task[1], task[2]);
     }
 
-    whenVerbose(
+    logWhenVerbose(
       chalk.blue(
         `Running pre-deploy task "${chalk.bold(task[0])}" for ${
           manifest.appName
@@ -165,18 +155,18 @@ const _runPreDeployTasks = async (manifest: INotifyAppManifest) => {
     const { stderr, stdout } = Bun.spawnSync(task);
     const stringStdout = bufferToString(stdout);
 
-    whenVerbose(stringStdout);
+    logWhenVerbose(stringStdout);
 
     if (stderr.length) {
       spinner.stop(true);
       console.log(
         chalk.bgRed.white('Pre-deploy task failed for ' + manifest.appName)
       );
-      whenVerbose(chalk.red(stderr));
+      logWhenVerbose(chalk.red(stderr));
       process.exit(1);
     }
 
-    whenVerbose(
+    logWhenVerbose(
       chalk.green(
         `Pre-deploy task ${task[0]} successful for ${manifest.appName}`
       )
@@ -221,5 +211,5 @@ export const caproverLogin = () => {
 
   console.log(chalk.green('Logged into CapRover'));
 
-  whenVerbose(bufferToString(stdout));
+  logWhenVerbose(bufferToString(stdout));
 };

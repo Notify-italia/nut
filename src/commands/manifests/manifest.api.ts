@@ -5,6 +5,9 @@ const manifest = publishManifest({
   projectName: 'nfc-api',
   productionContainer: 'notify-api',
   developContainer: 'ptc-notify-api',
+  preDeployTasks: [
+    ['cp', '-r', './apps/nfc-api/src/assets/', './dist/apps/nfc-api/assets'],
+  ],
 });
 
 export const runApiBuild = async () => {

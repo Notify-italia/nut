@@ -10,44 +10,78 @@ import {
   bufferToString,
   executeAsyncShell,
   executeShell,
+  logWhenVerbose,
   openAfterSync,
   parseCommand,
+  spinner,
 } from './commands/nut.utils';
 
-const cap = program
+const _program = program;
+
+const cap = _program
   .command('cap')
   .description('Agent client capacitor commands');
 
-program.command('force-login').action(async () => {
+_program.command('force-login').action(async () => {
   caproverLogin();
 });
 
-program
+_program
   .command('deploy <apps>')
   .description("Build and deploy apps to offcenter's CapRover container")
   .option('-prod --production', 'Deploy to production')
   .option('-v --verbose', 'Verbose output')
   .action(async () => {
-    const { productionOptTrue } = parseCommand(program);
+    const { productionOptTrue } = parseCommand(_program);
 
     await buildApps();
 
     await deployApps(productionOptTrue);
   });
 
-program
+_program
   .command('build <apps...>')
   .description('Build apps for deployment')
   .option('-prod --production', 'Build production')
   .option('-v --verbose', 'Verbose output')
   .action(async () => {
-    parseCommand(program);
+    parseCommand(_program);
 
     await buildApps();
   });
 
-program.command('serve <app>').action(async (app) => {
-  parseCommand(program);
+_program
+  .command('install')
+  .option('-v --verbose', 'Verbose output')
+  .action(async () => {
+    parseCommand(_program, {
+      appsNotRequired: true,
+    });
+
+    spinner.start();
+    spinner.setSpinnerTitle('Installing packages...');
+    spinner.setSpinnerString(32);
+
+    const { stderr, stdout, exitCode } = executeShell('npm install --force');
+    logWhenVerbose(bufferToString(stdout));
+
+    if (exitCode !== 0) {
+      spinner.stop(true);
+      console.error(chalk.red('Error installing packages'));
+      console.error(chalk.red(bufferToString(stderr)));
+      return;
+    }
+
+    if (stderr && exitCode === 0) {
+      logWhenVerbose(chalk.yellow(bufferToString(stderr)));
+    }
+
+    console.log(chalk.green('Packages installed successfully'));
+    spinner.stop(true);
+  });
+
+_program.command('serve <app>').action(async (app) => {
+  parseCommand(_program);
 
   const manifest = availableManifests.find(
     (manifest) => manifest.appName === app
@@ -62,7 +96,7 @@ program.command('serve <app>').action(async (app) => {
 
   console.log(chalk.blue(`Serving ${app} ${port ? `on port ${port}` : ''}...`));
 
-  program.on('SIGINT', () => {
+  _program.on('SIGINT', () => {
     console.log('Ctrl-C was pressed');
     process.exit(0);
   });
@@ -81,7 +115,7 @@ cap
   .option('-android', 'Open Android Studio after sync')
   .option('-both', 'Open both IDEs after sync')
   .action(async () => {
-    parseCommand(program, { appsOptional: true });
+    parseCommand(_program, { appsNotRequired: true });
 
     const manifest = await runAgentClientBuild({ capSync: true, force: true });
 
@@ -104,7 +138,7 @@ cap
   .command('open <platform>')
   .description('Open the agent client in the specified platform IDE')
   .action(async (platform) => {
-    parseCommand(program, { appsOptional: true });
+    parseCommand(_program, { appsNotRequired: true });
 
     const agentManifest = availableManifests.find(
       (manifest) => manifest.projectName === 'nfc-agent-client'
@@ -124,7 +158,7 @@ cap
   .command('sh <command>')
   .description('Run a capacitor command on the agent client project')
   .action(async (command) => {
-    parseCommand(program, { appsOptional: true });
+    parseCommand(_program, { appsNotRequired: true });
 
     const agentManifest = availableManifests.find(
       (manifest) => manifest.projectName === 'nfc-agent-client'
@@ -144,4 +178,4 @@ cap
     console.log(bufferToString(stdout));
   });
 
-program.parse();
+_program.parse();
